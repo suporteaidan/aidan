@@ -1,45 +1,45 @@
-# Aidan — Aplicativo mobile
+# Aidan — Mobile Application
 
-Aplicativo Aidan para Android (com suporte de desenvolvimento via Expo Web), criado em **React Native + Expo + TypeScript + Expo Router**. Esta é a base oficial de desenvolvimento, migrada do repositório de demonstração `aidan-showcase`.
+Aidan is an Android application (with Expo Web support for development) built with **React Native + Expo + TypeScript + Expo Router**. This is the official development foundation, migrated from the `aidan-showcase` demo repository.
 
-## Estado atual
+## Current Status
 
-**Fundação preparada; API ainda não integrada.** As telas, animações e fluxos visuais foram preservados e continuam usando dados mockados. Esta entrega adiciona a configuração de ambientes, cliente HTTP e módulos de integração preliminares; autenticação real, backend, persistência de dados e Google OAuth ainda serão desenvolvidos.
+**Foundation ready; API not yet integrated.** The screens, animations, and visual flows have been preserved and still use mock data. This release adds environment configuration, an HTTP client, and preliminary integration modules; real authentication, backend integration, data persistence, and Google OAuth are yet to be developed.
 
-- Telas: splash animada, login, conta Google demonstrativa, cadastro, verificação, localização, boas-vindas, home, menu, perfil, configurações, lista de compras, comparação de preços, pedidos, comunidade e mapas simulados.
-- Animações: logo Aidan inicial, carrinho na tela de boas-vindas e menu lateral suave.
-- Interações de demonstração: formulários editáveis, checkboxes, filtros e navegação.
-- Base técnica: `src/api` com `fetch`, timeout, tratamento de erros e interfaces **provisórias**.
+- Screens: animated splash screen, login, demo Google account selection, sign-up, verification, location, welcome, home, menu, profile, settings, shopping list, price comparison, orders, community, and simulated maps.
+- Animations: initial Aidan logo, shopping cart on the welcome screen, and smooth side menu.
+- Demo interactions: editable forms, checkboxes, filters, and navigation.
+- Technical foundation: `src/api` with `fetch`, timeout handling, error handling, and **provisional** interfaces.
 
-**Aviso:** o botão Google da versão atual é apenas uma simulação, não autenticação Google. O exemplo Dara é dado de demonstração e não deve ficar no produto final.
+**Note:** The Google button in the current version is only a simulation, not actual Google authentication. Dara's account is demo data and should not remain in the final product.
 
-## Requisitos
+## Requirements
 
-- Node.js 22 LTS (arquivo `.nvmrc`).
+- Node.js 22 LTS (`.nvmrc` file).
 - npm.
-- Git e uma conta GitHub para publicar.
-- Conta Expo para gerar builds Android (EAS).
-- Dispositivo Android real, emulador ou navegador para desenvolvimento.
+- Git and a GitHub account for publishing the code.
+- An Expo account to generate Android builds (EAS).
+- A physical Android device, an emulator, or a browser for development.
 
-## Início rápido
+## Quick Start
 
 ```bash
 cd aidan
-nvm use             # se você usa nvm; alternativamente use Node 22 instalado
-npm ci              # instalação reproduzível via package-lock.json
+nvm use             # if you use nvm; alternatively, use an installed Node.js 22 version
+npm ci              # reproducible installation using package-lock.json
 cp .env.example .env
-npm run web         # ou: npx expo start --clear --web
+npm run web         # or: npx expo start --clear --web
 ```
 
-Teste no Android:
+Test on Android:
 
 ```bash
 npm start
 ```
 
-Leia o QR Code no Expo Go compatível com SDK 54 ou use uma development build. Em celular físico, servidor/porta/API precisam ser alcançáveis pela rede do celular.
+Scan the QR code using an Expo Go version compatible with SDK 54, or use a development build. On a physical device, the server, port, and API must be reachable over the device's network.
 
-### Variáveis de ambiente
+### Environment Variables
 
 ```dotenv
 EXPO_PUBLIC_USE_MOCKS=true
@@ -48,82 +48,82 @@ EXPO_PUBLIC_API_TIMEOUT_MS=12000
 EXPO_PUBLIC_API_HEALTH_PATH=/health
 ```
 
-Em modo mock, a interface continua funcionando com os dados locais. Quando o backend estiver pronto, precisamos **ajustar as rotas e conectar cada tela aos services** — definir a URL sozinho não realiza essa integração.
+In mock mode, the UI continues to work with local data. Once the backend is ready, we will need to **adjust the routes and connect each screen to the services** — setting the URL alone does not complete the integration.
 
-Variáveis `EXPO_PUBLIC_*` são **públicas e incorporadas ao app compilado**. Não grave client secrets, senhas nem chaves privadas nelas.
+`EXPO_PUBLIC_*` variables are **public and bundled into the compiled app**. Do not store client secrets, passwords, or private keys in them.
 
-## Comandos
+## Commands
 
-| Comando | Função |
+| Command | Purpose |
 | --- | --- |
-| `npm ci` | Instala dependências do lockfile |
-| `npm start` | Inicia o Expo |
-| `npm run web` | Testa no navegador |
-| `npm run android` | Abre fluxo de desenvolvimento Android |
-| `npm run typecheck` | Checa TypeScript |
-| `npm run doctor` | Diagnóstico Expo |
-| `npm run lint` | ESLint Expo |
-| `npm run build:apk` | Gera APK preview via EAS |
-| `npm run build:prod` | Gera build de produção via EAS |
+| `npm ci` | Installs dependencies from the lockfile |
+| `npm start` | Starts Expo |
+| `npm run web` | Runs the app in a browser |
+| `npm run android` | Starts the Android development flow |
+| `npm run typecheck` | Checks TypeScript types |
+| `npm run doctor` | Runs Expo diagnostics |
+| `npm run lint` | Runs Expo ESLint checks |
+| `npm run build:apk` | Generates a preview APK using EAS |
+| `npm run build:prod` | Generates a production build using EAS |
 
-## APK e EAS
+## APK and EAS
 
-Este é um **novo aplicativo**: o antigo `projectId` do showcase foi removido para evitar que os builds se misturem. A identidade atual está em `app.json` (`slug: aidan`, `android.package: com.suporteaidan.aidan`). Confirme esse identificador antes de publicar na Play Store; alterar o `package` após distribuir impede atualizar o mesmo app pela loja.
+This is a **new application**: the old showcase `projectId` was removed to prevent builds from being mixed up. The current app identity is defined in `app.json` (`slug: aidan`, `android.package: com.suporteaidan.aidan`). Confirm this identifier before publishing to the Play Store; changing the `package` after distribution prevents the Play Store from updating the same app.
 
 ```bash
 npm install --global eas-cli
 eas login
-eas init                 # criar/vincular NOVO projeto Aidan no Expo
+eas init                 # create/link the NEW Aidan project in Expo
 eas build -p android --profile preview
 ```
 
-`eas.json` configura o perfil `preview` para gerar **APK** instalável e `production` para o fluxo normal de distribuição. O build real requer credenciais/configuração da conta Expo.
+`eas.json` configures the `preview` profile to generate an installable **APK** and the `production` profile for the standard distribution flow. Actual builds require Expo account credentials and configuration.
 
-## Estrutura
+## Project Structure
 
 ```text
-app/                     # rotas e telas Expo Router
-assets/                  # logo, fotos e ilustrações
+app/                     # Expo Router routes and screens
+assets/                  # logos, photos, and illustrations
 src/
   api/
-    client.ts            # cliente HTTP centralizado
+    client.ts            # centralized HTTP client
     errors.ts            # ApiError
-    contracts.ts         # tipos provisórios, a confirmar com backend
-    routes.ts            # URLs/paths provisórios, a confirmar
-    services/            # auth, catálogo, listas, pedidos, perfil e comunidade
-  auth/tokenStore.ts     # token somente em memória (temporário)
-  config/env.ts          # configuração pública de API/mocks
-  components/            # componentes reutilizáveis
-  data/                  # mocks atuais
-  theme/                 # tema
-  hooks/                 # hooks atuais
+    contracts.ts         # provisional types, to be confirmed with the backend
+    routes.ts            # provisional URLs/paths, to be confirmed
+    services/            # auth, catalog, lists, orders, profile, and community
+  auth/tokenStore.ts     # in-memory-only token storage (temporary)
+  config/env.ts          # public API/mock configuration
+  components/            # reusable components
+  data/                  # current mocks
+  theme/                 # theme
+  hooks/                 # current hooks
 docs/
-  API-INTEGRATION.md     # integração e mapa de endpoints propostos
-  GITHUB-SSH.md          # publicação GitHub com SSH
-  ROADMAP.md             # fases e próximos passos
+  API-INTEGRATION.md     # integration guide and proposed endpoint map
+  GITHUB-SSH.md          # GitHub publishing via SSH
+  ROADMAP.md             # phases and next steps
 .github/workflows/      # CI: npm ci + typecheck + Expo check
-.env.example             # exemplo, sem segredos
+.env.example             # example file, without secrets
 .gitignore
 .nvmrc
-package-lock.json        # deve ser versionado
+package-lock.json        # should be version-controlled
 ```
 
 ## API / Backend-Aidan
 
-Repositório informado: https://github.com/suporteaidan/Backend-Aidan
+Provided repository: https://github.com/suporteaidan/Backend-Aidan
 
-A estrutura e os endpoints desse backend **ainda precisam ser inspecionados**. Portanto, o contrato em `src/api/contracts.ts` e `src/api/routes.ts` representa apenas uma proposta. Não afirme que `/auth/login` ou qualquer outra rota existe até conferir o servidor.
+The structure and endpoints of this backend **still need to be inspected**. Therefore, the contracts in `src/api/contracts.ts` and `src/api/routes.ts` are only a proposal. Do not assume `/auth/login` or any other route exists before verifying the server.
 
-Na implementação da API, vamos mapear registro, login/refresh/logout, perfil e endereços, catálogo, listas, comparação de mercado/preços, pedidos, entregas, avaliações/comunidade e localização. Autenticação deverá usar mecanismos seguros para tokens, expiração de sessão e autorização no servidor.
+When implementing the API, we will map registration, login/refresh/logout, profiles and addresses, the catalog, shopping lists, market/price comparisons, orders, deliveries, ratings/community, and location. Authentication must use secure mechanisms for tokens, session expiration, and server-side authorization.
 
-Consulte [`docs/API-INTEGRATION.md`](docs/API-INTEGRATION.md).
+See [`docs/API-INTEGRATION.md`](docs/API-INTEGRATION.md).
 
-## GitHub e SSH
+## GitHub and SSH
 
-Veja [`docs/GITHUB-SSH.md`](docs/GITHUB-SSH.md), com criação da chave Ed25519 na sua máquina, cadastro da chave pública no GitHub e comandos para o primeiro push.
+See [`docs/GITHUB-SSH.md`](docs/GITHUB-SSH.md) for instructions on creating an Ed25519 key on your machine, registering the public key with GitHub, and making the first push.
 
-**Não inclua** `node_modules`, `.git` herdado do showcase, chaves privadas, `.env`, APKs e artefatos compilados no repositório.
+**Do not commit** `node_modules`, the inherited `.git` directory from the showcase, private keys, `.env`, APK files, or compiled artifacts to the repository.
 
-## Licença e privacidade
+## License and Privacy
 
-O ZIP original já trazia um arquivo `LICENSE` MIT; ele foi preservado **sem alteração**. Antes de tornar o repositório público/comercial, decida se essa licença atende ao modelo do produto. Não exponha dados reais, credenciais de API ou imagens pessoais sem autorização.
+The original ZIP already included an MIT `LICENSE` file; it has been preserved **without changes**. Before making the repository public or commercial, decide whether this license fits the product's business model. Do not expose real personal data, API credentials, or personal images without authorization.
