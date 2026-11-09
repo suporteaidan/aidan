@@ -1,0 +1,50 @@
+# Dependências e saídas geradas
+node_modules/
+.expo/
+dist/
+build/
+coverage/
+web-build/
+*.tsbuildinfo
+
+# Expo / React Native (gerados localmente)
+android/
+ios/
+*.apk
+*.aab
+*.ipa
+
+# Configuração local e dados sensíveis
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+*.pem
+*.p12
+*.p8
+*.jks
+*.keystore
+*.mobileprovision
+*.key
+*.cer
+*.crt
+*.asc
+
+# Chaves, serviços e configuração privada
+credentials.json
+service-account.json
+google-services.json
+GoogleService-Info.plist
+
+# Editor, sistema e logs
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Manter package-lock.json versionado (npm ci)
