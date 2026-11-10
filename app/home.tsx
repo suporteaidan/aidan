@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomArea, Phone, SearchBox } from '@/components/AidanUI';
 
@@ -30,7 +30,7 @@ export default function HomeScreen() {
           {filteredCategories.map((label) => <Pressable key={label} onPress={() => router.push('/shopping-list')} style={styles.category}><Text style={styles.categoryText}>{label}</Text></Pressable>)}
           {filteredCategories.length === 0 && <Text style={styles.emptySearch}>Nenhuma categoria encontrada</Text>}
         </View>
-        <Pressable onPress={() => router.push('/import-receipt')} style={({ pressed }) => [styles.scanButton, pressed && styles.pressed]}>
+        <Pressable onPress={() => router.push('/import-receipt' as Href)} style={({ pressed }) => [styles.scanButton, pressed && styles.pressed]}>
           <Text style={styles.scanText}>Escanear cupons</Text>
           <Ionicons name="barcode-outline" size={58} color="#FFFFFF" />
         </Pressable>

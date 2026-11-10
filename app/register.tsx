@@ -44,7 +44,7 @@ export default function RegisterScreen() {
     }
     setBusy(true);
     try {
-      await register({ name: fullName.trim(), cpf: digits(cpf), email: email.trim().toLowerCase(), password, phone: digits(phone) || null });
+      await register({ name: fullName.trim(), cpf: digits(cpf), email: email.trim().toLowerCase(), password, phone: digits(phone) || undefined });
       // The backend does not provide email verification or tokens on registration.
       router.replace({ pathname: '/login', params: { registered: '1' } });
     } catch (e) {

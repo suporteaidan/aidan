@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '@/auth/AuthProvider';
 import { env } from '@/config/env';
@@ -55,7 +55,7 @@ export default function LoginScreen() {
           <Text style={styles.divider}>ou</Text>
           <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#BDBDBD" keyboardType="email-address" autoCapitalize="none" autoComplete="email" value={email} onChangeText={setEmail} editable={!busy} />
           <TextInput style={styles.input} placeholder="Senha" placeholderTextColor="#BDBDBD" secureTextEntry autoComplete="current-password" value={password} onChangeText={setPassword} editable={!busy} onSubmitEditing={() => { void handleLogin(); }} />
-          <Pressable style={styles.forgotButton} onPress={() => router.push('/forgot-password')}>
+          <Pressable style={styles.forgotButton} onPress={() => router.push('/forgot-password' as Href)}>
             <Text style={styles.forgotText}>Esqueceu sua senha?</Text>
           </Pressable>
           {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}

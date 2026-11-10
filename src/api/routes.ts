@@ -1,15 +1,18 @@
-/**
- * Rascunho de rotas; validar e modificar após inspeção do Backend-Aidan.
- * Em especial, /auth/* e /products NÃO foram confirmados no servidor.
- */
+/** Rotas existentes conferidas em Backend-Aidan (main, 2026-11-09). */
 export const apiRoutes = {
-  login: '/auth/login',
-  register: '/auth/register',
-  verifyCode: '/auth/verify-code',
-  me: '/users/me',
-  products: '/products',
-  shoppingLists: '/shopping-lists',
-  orders: '/orders',
-  reviews: '/reviews',
-  addresses: '/addresses',
+  health: '/health',
+  login: '/api/v1/auth/login',
+  register: '/api/v1/users',
+  importNfe: '/api/v1/nfes/import',
+} as const;
+
+/** Rotas ainda NÃO implementadas no backend, somente sugestões para o roadmap. */
+export const proposedApiRoutes = {
+  verifyCode: '/api/v1/auth/verify-code',
+  me: '/api/v1/users/me',
+  products: '/api/v1/products',
+  shoppingLists: '/api/v1/shopping-lists',
+  orders: '/api/v1/orders',
+  reviews: '/api/v1/reviews',
+  addresses: '/api/v1/addresses',
 } as const;
