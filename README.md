@@ -1,129 +1,147 @@
 # Aidan — Mobile Application
 
-Aidan is an Android application (with Expo Web support for development) built with **React Native + Expo + TypeScript + Expo Router**. This is the official development foundation, migrated from the `aidan-showcase` demo repository.
+Aidan is the official Android-first mobile client for the Aidan platform, developed with **React Native, Expo SDK 54, Expo Router 6, TypeScript, and EAS Build**. The UI originates from the `aidan-showcase` prototype and retains its animated splash screen, cart illustration, sliding menu, shopping and community layouts.
 
-## Current Status
+## Current integration status
 
-**Foundation ready; API not yet integrated.** The screens, animations, and visual flows have been preserved and still use mock data. This release adds environment configuration, an HTTP client, and preliminary integration modules; real authentication, backend integration, data persistence, and Google OAuth are yet to be developed.
+**Implemented in this release:**
 
-- Screens: animated splash screen, login, demo Google account selection, sign-up, verification, location, welcome, home, menu, profile, settings, shopping list, price comparison, orders, community, and simulated maps.
-- Animations: initial Aidan logo, shopping cart on the welcome screen, and smooth side menu.
-- Demo interactions: editable forms, checkboxes, filters, and navigation.
-- Technical foundation: `src/api` with `fetch`, timeout handling, error handling, and **provisional** interfaces.
+- Real email/password sign-in using `POST /api/v1/auth/login` (OAuth2 URL-encoded form).
+- Real registration using `POST /api/v1/users` (name, CPF, email, password, optional phone).
+- Client-side validation, loading states and visible API errors.
+- JWT Bearer authorization in a centralized HTTP client, request timeouts and 401 session clearing.
+- Session storage using **Expo SecureStore on Android/iOS**; the Web demo stores the session **in memory only**.
+- Basic route redirects for guests, logout and session restoration on relaunch.
+- NFC-e import by pasting a public QR URL via `POST /api/v1/nfes/import`.
+- Distinct **mock mode** for the original presentation screens.
 
-**Note:** The Google button in the current version is only a simulation, not actual Google authentication. Dara's account is demo data and should not remain in the final product.
+**Not available in Backend-Aidan yet:** Google OAuth/OIDC, email/code verification, password recovery, `/users/me`, refresh tokens, user profile edits, catalog/search API, shopping lists, orders, deliveries, community reviews, camera QR capture and real interactive maps. Those screens remain showcase-oriented; they are **not** production features yet. Backend authorization is required for all private API calls regardless of frontend navigation guards.
 
-## Requirements
+### Technology
 
-- Node.js 22 LTS (`.nvmrc` file).
-- npm.
-- Git and a GitHub account for publishing the code.
-- An Expo account to generate Android builds (EAS).
-- A physical Android device, an emulator, or a browser for development.
+- Node.js 22 LTS (`.nvmrc`)
+- Expo `~54.0.37`, Expo Constants `~18.0.14`
+- React 19.1.0 / React Native 0.81.5
+- Expo Router ~6.0.24
+- Expo SecureStore ~15.0.7 (native storage, **new binary required**)
+- Python / FastAPI backend in [Backend-Aidan](https://github.com/suporteaidan/Backend-Aidan)
 
-## Quick Start
+## Install
 
 ```bash
 cd aidan
-nvm use             # if you use nvm; alternatively, use an installed Node.js 22 version
-npm ci              # reproducible installation using package-lock.json
+nvm use 22
+npm install                 # important on first upgrade; updates package-lock.json
 cp .env.example .env
-npm run web         # or: npx expo start --clear --web
+npm run typecheck
+npm run doctor
+npm run web
 ```
 
-Test on Android:
+Once the lockfile includes Expo SecureStore, the team can use `npm ci` for reproducible installs. **Commit the updated `package-lock.json`** along with `package.json`.
 
-```bash
-npm start
-```
+### Configure the backend
 
-Scan the QR code using an Expo Go version compatible with SDK 54, or use a development build. On a physical device, the server, port, and API must be reachable over the device's network.
-
-### Environment Variables
+In `.env`, enable real API mode:
 
 ```dotenv
-EXPO_PUBLIC_USE_MOCKS=true
-EXPO_PUBLIC_API_URL=
+EXPO_PUBLIC_USE_MOCKS=false
+EXPO_PUBLIC_API_URL=http://192.168.1.20:8000
 EXPO_PUBLIC_API_TIMEOUT_MS=12000
-EXPO_PUBLIC_API_HEALTH_PATH=/health
 ```
 
-In mock mode, the UI continues to work with local data. Once the backend is ready, we will need to **adjust the routes and connect each screen to the services** — setting the URL alone does not complete the integration.
+Replace the example LAN IP with the machine actually running FastAPI and ensure the phone can reach it. For Web on the same computer, use `http://localhost:8000` and allow the Expo Web origin in the backend CORS configuration. For production, **use HTTPS**, secure server-side authorization and a hosted API.
 
-`EXPO_PUBLIC_*` variables are **public and bundled into the compiled app**. Do not store client secrets, passwords, or private keys in them.
-
-## Commands
-
-| Command | Purpose |
-| --- | --- |
-| `npm ci` | Installs dependencies from the lockfile |
-| `npm start` | Starts Expo |
-| `npm run web` | Runs the app in a browser |
-| `npm run android` | Starts the Android development flow |
-| `npm run typecheck` | Checks TypeScript types |
-| `npm run doctor` | Runs Expo diagnostics |
-| `npm run lint` | Runs Expo ESLint checks |
-| `npm run build:apk` | Generates a preview APK using EAS |
-| `npm run build:prod` | Generates a production build using EAS |
-
-## APK and EAS
-
-This is a **new application**: the old showcase `projectId` was removed to prevent builds from being mixed up. The current app identity is defined in `app.json` (`slug: aidan`, `android.package: com.suporteaidan.aidan`). Confirm this identifier before publishing to the Play Store; changing the `package` after distribution prevents the Play Store from updating the same app.
+To check the API independently:
 
 ```bash
-npm install --global eas-cli
-eas login
-eas init                 # create/link the NEW Aidan project in Expo
-eas build -p android --profile preview
+AIDAN_API_URL=http://localhost:8000 npm run api:health
 ```
 
-`eas.json` configures the `preview` profile to generate an installable **APK** and the `production` profile for the standard distribution flow. Actual builds require Expo account credentials and configuration.
+`EXPO_PUBLIC_*` values are **publicly embedded in the app bundle**; never put secrets there.
 
-## Project Structure
+### Login and registration in real mode
+
+1. Enter the app, open Sign Up and enter a real name, CPF, email and password.
+2. The frontend submits JSON to `POST /api/v1/users`.
+3. Successful registration redirects to Login. There is **no fake email verification**.
+4. Login submits `application/x-www-form-urlencoded` with `username=<email>&password=<password>` to `POST /api/v1/auth/login`.
+5. The returned JWT is stored securely on native devices. The app restores valid sessions and clears expired/401 sessions.
+6. Logout erases local credentials. The backend does not yet provide refresh or token revocation.
+
+The demo Google account is intentionally **disabled in real mode** until server-side OIDC token validation is implemented.
+
+### Demo mode
+
+Keep `EXPO_PUBLIC_USE_MOCKS=true` to view the original Aidan flows offline. In mock mode, login and registration continue with the showcase flow, including Dara's demo account and the 5-digit example verification screen. These flows never call the real API.
+
+## Android APK / EAS
+
+This repository uses the independent Expo project **`@lucas0000miranda/aidan`** and Android package **`com.suporteaidan.aidan`**. The EAS project ID is configured in `app.json` as created during the setup. Do **not** relink the project to `aidan-showcase`.
+
+```bash
+eas whoami
+eas project:info
+npm run doctor
+eas build -p android --profile preview --clear-cache
+```
+
+Adding Expo SecureStore changes native dependencies, so a **new Android APK is required**. An EAS build that started before these changes does not include them. Preview creates an installable APK; production uses the production EAS profile.
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run web` | Start Expo Web |
+| `npm start` | Start Expo / QR code for Android |
+| `npm run typecheck` | TypeScript validation |
+| `npm run doctor` | Expo dependency diagnostics |
+| `npm run lint` | Expo lint |
+| `npm run api:health` | Test a running backend's `/health` |
+| `npm run build:apk` | EAS preview APK |
+| `npm run build:prod` | EAS production build |
+
+## Structure
 
 ```text
-app/                     # Expo Router routes and screens
-assets/                  # logos, photos, and illustrations
+app/                  Expo Router screens and navigation
+  index.tsx           Animated splash and session-based redirect
+  login.tsx           Real/mock login
+  register.tsx        Real/mock registration with CPF validation
+  forgot-password.tsx Honest placeholder (backend endpoint required)
+  import-receipt.tsx  Authenticated NFC-e URL import
+  home.tsx            Main screen
+  menu.tsx            Animated drawer and logout
 src/
-  api/
-    client.ts            # centralized HTTP client
-    errors.ts            # ApiError
-    contracts.ts         # provisional types, to be confirmed with the backend
-    routes.ts            # provisional URLs/paths, to be confirmed
-    services/            # auth, catalog, lists, orders, profile, and community
-  auth/tokenStore.ts     # in-memory-only token storage (temporary)
-  config/env.ts          # public API/mock configuration
-  components/            # reusable components
-  data/                  # current mocks
-  theme/                 # theme
-  hooks/                 # current hooks
-docs/
-  API-INTEGRATION.md     # integration guide and proposed endpoint map
-  GITHUB-SSH.md          # GitHub publishing via SSH
-  ROADMAP.md             # phases and next steps
-.github/workflows/      # CI: npm ci + typecheck + Expo check
-.env.example             # example file, without secrets
-.gitignore
-.nvmrc
-package-lock.json        # should be version-controlled
+  api/                Typed contracts, routes, HTTP client, services
+  auth/               AuthProvider, guard, native encrypted token session
+  components/         Shared UI widgets
+  config/             Environment configuration
+  data/               Presentation mocks
+assets/               App images and icons
+scripts/              Backend health check
+docs/                 Integration and development notes
+.github/workflows/    Automated validation for main and dev
 ```
 
-## API / Backend-Aidan
+## Known limitations and next milestones
 
-Provided repository: https://github.com/suporteaidan/Backend-Aidan
+- No `/users/me` endpoint yet: after logging in, the app can display the email used to sign in but cannot fetch the full server profile. Profile editing remains a visual prototype.
+- No password reset, code verification or Google sign-in on the server.
+- No refresh token support: expired access tokens require a fresh login.
+- NFC-e import returns receipt metadata, not the list of purchased products. A new backend read endpoint is needed.
+- Most shopping, ordering, community and location screens remain local demonstrations.
+- Native SecureStore persists sessions but **does not replace server-side authentication, authorization or token revocation**.
+- Before production, implement API tests, HTTPS, request validation, consent flows for CPF and location, a published privacy policy, and real Google OAuth/OIDC.
 
-The structure and endpoints of this backend **still need to be inspected**. Therefore, the contracts in `src/api/contracts.ts` and `src/api/routes.ts` are only a proposal. Do not assume `/auth/login` or any other route exists before verifying the server.
+See [API-INTEGRATION.md](docs/API-INTEGRATION.md), [UPGRADE-V14.md](docs/UPGRADE-V14.md) and [ROADMAP.md](docs/ROADMAP.md).
 
-When implementing the API, we will map registration, login/refresh/logout, profiles and addresses, the catalog, shopping lists, market/price comparisons, orders, deliveries, ratings/community, and location. Authentication must use secure mechanisms for tokens, session expiration, and server-side authorization.
+## Git workflow
 
-See [`docs/API-INTEGRATION.md`](docs/API-INTEGRATION.md).
+`main` is the release branch and `dev` is the integration branch. Create `dev` from an updated `main`, make feature commits on `dev` and merge via pull request after validation. Do not force-push shared branches.
 
-## GitHub and SSH
+Do not commit `.env`, private keys, credentials, `node_modules`, Gradle outputs or APKs. `.gitignore` already covers these. `package-lock.json` must be committed after dependency installation.
 
-See [`docs/GITHUB-SSH.md`](docs/GITHUB-SSH.md) for instructions on creating an Ed25519 key on your machine, registering the public key with GitHub, and making the first push.
+## License
 
-**Do not commit** `node_modules`, the inherited `.git` directory from the showcase, private keys, `.env`, APK files, or compiled artifacts to the repository.
-
-## License and Privacy
-
-The original ZIP already included an MIT `LICENSE` file; it has been preserved **without changes**. Before making the repository public or commercial, decide whether this license fits the product's business model. Do not expose real personal data, API credentials, or personal images without authorization.
+The inherited `LICENSE` is MIT. Before commercial release, confirm that this is the intended licensing model and that any personal image assets are authorized for distribution.

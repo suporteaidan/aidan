@@ -1,61 +1,46 @@
-# Integração de API — contrato inicial (em aberto)
+# Backend-Aidan integration (verified 2026-11-09)
 
-Backend informado: https://github.com/suporteaidan/Backend-Aidan
+Backend source: https://github.com/suporteaidan/Backend-Aidan (`main`). FastAPI, Python 3.12+, PostgreSQL, async SQLAlchemy, Alembic, Poetry.
 
-**Estado:** a estrutura deste backend ainda não pôde ser verificada. Os caminhos em
-`src/api/routes.ts` e tipos em `src/api/contracts.ts` são rascunhos, NÃO endpoints existentes confirmados.
+## Implemented endpoints
 
-## Camada HTTP preparada
+| Method | Route | Auth | Request | Response |
+| --- | --- | --- | --- | --- |
+| GET | `/health` | No | — | `{ "status": "ok" }` |
+| POST | `/api/v1/users` | No | JSON `{name, cpf, email, password, address?, phone?}` | `201 UserRead` |
+| POST | `/api/v1/auth/login` | No | `application/x-www-form-urlencoded`: `username=<email>&password=<password>` | `{access_token, token_type}` |
+| POST | `/api/v1/nfes/import` | JWT Bearer | JSON `{qr_code_url}` | `201 {id,nfe_key,nfe_date,market_id,user_id}` |
 
-- `src/config/env.ts`: URL, timeout e alternância de mocks.
-- `src/api/client.ts`: `fetch`, JSON, Bearer token, timeout, erro de rede e HTTP.
-- `src/api/errors.ts`: `ApiError` para tratar erros nas telas.
-- `src/auth/tokenStore.ts`: token somente em memória **temporariamente**.
-- `src/api/services/`: auth, catálogo, listas, pedidos, comunidade e perfil.
+The API only has the listed routes in its versioned router. The API backend must be deployed and reachable; the presence of code in GitHub is not proof of a deployed server.
 
-## Passos antes de ativar a API
+## Frontend implementation
 
-1. Conferir framework, endpoints, payloads, autenticação e exemplos de JSON do Backend-Aidan.
-2. Corrigir contratos em `contracts.ts`, caminhos em `routes.ts` e tratamento de respostas paginadas.
-3. Definir backend `dev`, `staging`, `production`, CORS para Web e HTTPS para produção.
-4. Implementar autenticação real, expiração/refresh/logout de token, autorização e recuperação de senha.
-5. Instalar a versão de `expo-secure-store` compatível com SDK 54 para armazenamento de tokens no Android.
-6. Conectar formulários, lista, carrinho, mapa, comunidade e pedidos aos services com loading/erro/empty state.
-7. Trocar imagens, emails e dados demo do usuário Dara por dados da sessão autenticada.
-8. Realizar testes integrados e e2e antes de usar dados reais.
+- `src/api/client.ts`: timeout, JSON/Form content types, Bearer token, useful API errors, clears invalid native session on 401.
+- `src/api/services/auth.ts`: verified OAuth2 form and JSON signup.
+- `src/auth/tokenStore.ts`: Expo SecureStore on native platforms; no web persistent storage; JWT expiry checks.
+- `src/auth/AuthProvider.tsx`: state management, sign-in, signup and signout.
+- `src/auth/AuthGate.tsx`: client navigation guard only; **not an authorization boundary**.
+- `app/login.tsx`, `app/register.tsx`: real auth when `EXPO_PUBLIC_USE_MOCKS=false`; demo flow otherwise.
+- `app/import-receipt.tsx`: paste NFC-e QR URL and send authenticated request. Camera scanning not yet implemented.
 
-## Endpoint map — somente proposta
+## Planned backend work
 
-| Fluxo no app | Service | Endpoint sugerido (não confirmado) |
-| --- | --- | --- |
-| Login | `authApi.login` | `POST /auth/login` |
-| Cadastro | `authApi.register` | `POST /auth/register` |
-| Código | `authApi.verifyCode` | `POST /auth/verify-code` |
-| Perfil | `profileApi.get` | `GET /users/me` |
-| Produtos | `catalogApi.search` | `GET /products?q=...` |
-| Listas | `shoppingListsApi` | `/shopping-lists` |
-| Pedidos | `ordersApi.list` | `GET /orders` |
-| Comunidade | `communityApi.search` | `GET /reviews?q=...` |
-| Endereços | `profileApi.addresses` | `GET /addresses` |
+1. `GET /api/v1/users/me` and `PATCH /api/v1/users/me` to fetch and update server-side profile.
+2. Email verification, password reset and account-recovery flow; no fictional 5-digit API.
+3. Google OIDC verification on server, with secure native provider sign-in.
+4. Refresh/revoke access tokens, rotation, and session security policies.
+5. Shopping lists and items; catalog, markets and price comparisons.
+6. Order and delivery workflows, histories and user reviews.
+7. Maps/geolocation and permissions/consent; NFC-e items read endpoint.
+8. Tests for HTTP contracts, 401/403/422, rate limits, CPF uniqueness and OAuth logic.
 
-**Google Login:** escolher uma conta mockada não é OAuth real. O botão da demo NÃO deve continuar assim em produção. Implementar Google OAuth/OIDC com validação no backend e sem colocar client secret no aplicativo.
+## Environment
 
-## Modo mock x API
+On Android physically connected over Wi-Fi, API URL must be accessible from the phone. `localhost` points to the phone, not your Ubuntu laptop. Example:
 
-Arquivo `.env` (a partir de `.env.example`):
-
-```
-EXPO_PUBLIC_USE_MOCKS=true
-EXPO_PUBLIC_API_URL=
-```
-
-Quando backend e contratos estiverem confirmados:
-
-```
+```dotenv
 EXPO_PUBLIC_USE_MOCKS=false
-EXPO_PUBLIC_API_URL=https://api.seudominio.com
+EXPO_PUBLIC_API_URL=http://192.168.1.20:8000
 ```
 
-**Importante:** mudar as variáveis não conecta automaticamente as telas. As telas do showcase ainda chamam dados mocks e navegação locais; a ligação com os services é a próxima etapa.
-
-No Android físico, `localhost` aponta para o celular, não para o computador. Para teste local, use IP de rede acessível (com firewall/liberação adequada) ou túnel HTTPS confiável. `EXPO_PUBLIC_*` fica legível no APK; nunca use para segredos.
+Use your actual private network IP in development. In deployment use HTTPS and keep backend database, JWT signing secrets, OAuth client secrets and service keys **server-side only**. EAS build-time public env vars must be configured for each build profile.

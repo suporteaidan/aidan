@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -72,6 +72,7 @@ export function PrimaryButton({ label, onPress, href, style, disabled = false }:
 
 export function Field({ placeholder, value, small = false, icon, tint = false }: { placeholder?: string; value?: string; small?: boolean; icon?: IconName; tint?: boolean }) {
   const [inputValue, setInputValue] = useState(value ?? '');
+  useEffect(() => setInputValue(value ?? ''), [value]);
 
   return (
     <View style={[styles.field, small && styles.fieldSmall, tint && styles.fieldTint]}>

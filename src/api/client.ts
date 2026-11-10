@@ -3,7 +3,6 @@ import { tokenStore } from '@/auth/tokenStore';
 import { ApiError } from './errors';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-
 export type RequestOptions = {
   method?: HttpMethod;
   body?: unknown;
@@ -12,10 +11,7 @@ export type RequestOptions = {
   timeoutMs?: number;
 };
 
-/**
- * HTTP centralizado: timeout, JSON, bearer token e normalização de erros.
- * Rotas e envelopes da API ainda precisam ser confirmados com o backend.
- */
+/** Cliente HTTP único, com suporte a JSON e application/x-www-form-urlencoded. */
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   if (env.useMocks) {
     throw new ApiError('Modo mock ativo. Endpoint real não foi chamado.', null, 'MOCK_MODE');
@@ -37,11 +33,16 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       ...options.headers,
     };
     if (token) headers.Authorization = `Bearer ${token}`;
+    const encodedBody = options.body === undefined
+      ? undefined
+      : typeof options.body === 'string'
+        ? options.body
+        : JSON.stringify(options.body);
 
     const response = await fetch(url, {
       method: options.method ?? 'GET',
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: encodedBody,
       signal: controller.signal,
     });
 
@@ -53,9 +54,19 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         : await response.text();
 
     if (!response.ok) {
-      const message = typeof payload === 'object' && payload !== null && 'message' in payload && typeof payload.message === 'string'
-        ? payload.message
-        : `Erro na API: HTTP ${response.status}`;
+      // Expired or rejected sessions are removed immediately. Login requests
+      // use authenticated:false, so a wrong password never clears another session.
+      if (response.status === 401 && options.authenticated !== false) {
+        try { await tokenStore.clear(); } catch { /* Preserve HTTP 401 response */ }
+      }
+      const detail = typeof payload === 'object' && payload !== null && 'detail' in payload
+        ? payload.detail
+        : null;
+      const message = typeof detail === 'string'
+        ? detail
+        : typeof payload === 'object' && payload !== null && 'message' in payload && typeof payload.message === 'string'
+          ? payload.message
+          : `Erro na API: HTTP ${response.status}`;
       throw new ApiError(message, response.status, 'HTTP_ERROR', payload);
     }
     return payload as T;

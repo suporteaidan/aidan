@@ -1,4 +1,5 @@
-import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { env } from '@/config/env';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
@@ -7,7 +8,10 @@ const googleIcon = require('../assets/google-g.png');
 const daraProfile = require('../assets/dara-profile.png');
 
 export default function GoogleAccountScreen() {
-  const goToDemo = () => router.replace('/register');
+  const goToDemo = () => {
+    if (env.useMocks) router.replace('/register');
+    else Alert.alert('Google OAuth indisponível', 'O backend ainda precisa implementar a verificação da conta Google. Use o login com email e senha.');
+  };
   const goBack = () => router.back();
 
   return (

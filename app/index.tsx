@@ -1,11 +1,15 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Image, Platform, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useAuth } from '@/auth/AuthProvider';
+import { env } from '@/config/env';
 
 const logo = require('../assets/aidan-logo.png');
 
 export default function SplashScreen() {
+  const { status } = useAuth();
+  const [animationFinished, setAnimationFinished] = useState(false);
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.55)).current;
   const logoRotate = useRef(new Animated.Value(-10)).current;
@@ -50,12 +54,16 @@ export default function SplashScreen() {
       ])
     ]).start();
 
-    const timer = setTimeout(() => {
-      router.replace('/login');
-    }, 1850);
+    const timer = setTimeout(() => setAnimationFinished(true), 1850);
 
     return () => clearTimeout(timer);
   }, [logoOpacity, logoScale, logoRotate, wordOpacity, progress]);
+
+  useEffect(() => {
+    if (animationFinished && status !== 'loading') {
+      router.replace(!env.useMocks && status === 'authenticated' ? '/home' : '/login');
+    }
+  }, [animationFinished, status]);
 
   const rotate = logoRotate.interpolate({
     inputRange: [-10, 0],

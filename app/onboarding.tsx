@@ -3,7 +3,7 @@ import { Screen } from '@/components/Screen';
 import { Header } from '@/components/Header';
 import { InfoCard } from '@/components/InfoCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { colors, radius } from '@/theme/colors';
+import { colors } from '@/theme/colors';
 
 export default function OnboardingScreen() {
   return (

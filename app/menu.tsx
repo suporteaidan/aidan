@@ -3,6 +3,8 @@ import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'reac
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomArea, DaraAvatar, IconLine, Phone, SearchBox } from '@/components/AidanUI';
+import { env } from '@/config/env';
+import { useAuth } from '@/auth/AuthProvider';
 
 const logo = require('../assets/aidan-logo.png');
 
@@ -25,6 +27,7 @@ function HomeDimmed() {
 }
 
 export default function MenuScreen() {
+  const { session, logout } = useAuth();
   const slideAnim = useRef(new Animated.Value(-270)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -74,8 +77,8 @@ export default function MenuScreen() {
           <Ionicons name="notifications-outline" size={24} color="#4B5CFF" />
         </View>
         <View style={styles.profileRow}>
-          <DaraAvatar size={38} />
-          <View><Text style={styles.name}>Dara Vitória</Text><Text style={styles.type}>Pessoal</Text></View>
+          {env.useMocks ? <DaraAvatar size={38} /> : <Ionicons name="person-circle-outline" size={38} color="#5865F2" />}
+          <View style={styles.profileLabel}><Text style={styles.name}>{env.useMocks ? 'Dara Vitória' : (session?.name || session?.email || 'Minha conta')}</Text><Text style={styles.type}>Pessoal</Text></View>
         </View>
         <View style={styles.lines}>
           <IconLine icon="person-outline" text="Perfil" href="/profile" />
@@ -83,7 +86,9 @@ export default function MenuScreen() {
           <IconLine icon="map-outline" text="Mapa interativo" href="/map" />
           <IconLine icon="people-outline" text="Comunidade" href="/community" />
           <IconLine icon="settings-outline" text="Configurações" href="/settings" />
-          <IconLine icon="log-out-outline" text="Sair" href="/login" />
+          <Pressable onPress={() => { void logout().then(() => router.replace('/login')); }} style={styles.signoutRow}>
+            <Ionicons name="log-out-outline" size={24} color="#4B5CFF" /><Text style={styles.signoutText}>Sair</Text>
+          </Pressable>
         </View>
       </Animated.View>
     </Phone>
@@ -103,11 +108,14 @@ const styles = StyleSheet.create({
   scanButton: { height: 113, width: 205, alignSelf: 'center', backgroundColor: '#5865F2', borderRadius: 6, alignItems: 'center', justifyContent: 'center', shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.16, shadowRadius: 3, elevation: 3 },
   scanText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800', marginBottom: 2 },
   closeLayer: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.12)' },
-  drawer: { position: 'absolute', left: 0, top: 0, width: 260, height: 420, backgroundColor: '#FFFFFF', borderBottomRightRadius: 17, paddingTop: 19, paddingHorizontal: 30, shadowColor: '#000000', shadowOffset: { width: 8, height: 0 }, shadowOpacity: 0.12, shadowRadius: 18, elevation: 8 },
+  drawer: { position: 'absolute', left: 0, top: 0, width: 260, height: 460, maxHeight: '92%', backgroundColor: '#FFFFFF', borderBottomRightRadius: 17, paddingTop: 19, paddingHorizontal: 30, shadowColor: '#000000', shadowOffset: { width: 8, height: 0 }, shadowOpacity: 0.12, shadowRadius: 18, elevation: 8 },
   drawerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 19 },
   menuTitle: { color: '#333333', fontSize: 16, fontWeight: '900' },
   profileRow: { flexDirection: 'row', alignItems: 'center', gap: 13, marginBottom: 18 },
   name: { color: '#333333', fontSize: 14, fontWeight: '500' },
   type: { color: '#777777', fontSize: 12 },
-  lines: { gap: 0 }
+  lines: { gap: 0 },
+  profileLabel: { flex: 1 },
+  signoutRow: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 45 },
+  signoutText: { color: '#333333', fontSize: 13 }
 });

@@ -1,26 +1,22 @@
-# Roadmap Aidan
+# Aidan roadmap
 
-## Fase 1 — Base do repositório (iniciada)
-- [x] Migrar telas e assets do `aidan-showcase` sem `node_modules`, `.git` ou `.idea`.
-- [x] Renomear o pacote/identidade Expo para `aidan`.
-- [x] Criar README, `.gitignore`, `.env.example`, CI e guia de Git/SSH.
-- [x] Criar cliente HTTP, erros, serviços e contratos preliminares.
-- [ ] Criar/vincular GitHub `aidan` com sua chave SSH local.
-- [ ] Vincular novo projeto EAS via `eas init` e configurar credentials.
+## Completed in v14 Auth Foundation (2026-11-09)
+- Expo SDK 54 versions aligned with project `aidan`.
+- Existing splash, login, shopping, menu and welcome animations retained.
+- Real email/password login and registration service connections.
+- CPF validation, native encrypted token storage, restore/signout, client guard.
+- NFC-e QR URL import using the existing backend endpoint.
+- Android EAS identity preserved.
 
-## Fase 2 — App funcional e integração
-- [ ] Revisar e padronizar navegação, componentes e layouts responsivos.
-- [ ] Adicionar gerenciamento de sessão e formulários com validação.
-- [ ] Substituir os mocks por repositories/services com estados de loading/erro/vazio.
-- [ ] Consumir endpoints reais de cadastro, login e perfil.
-- [ ] Persistir sessão com armazenamento seguro e expiração de tokens.
-- [ ] Integrar busca, listas, comparação de preços, pedidos, comunidade e entregas.
-- [ ] Mapas, permissões e localização com consentimento.
-- [ ] Testes unitários, integração e E2E; observabilidade.
+## Next: Backend and client integration
+- Start FastAPI/PostgreSQL and validate HTTP responses from Android and Web.
+- Add GET/PATCH user profile and persist profile form values.
+- Add email verification and password recovery (backend + UI).
+- Add OAuth/OIDC Google login with backend validation.
+- Build product/catalog, shopping list, pricing and order endpoints and wire screens.
+- Implement camera QR scanner and NFC-e purchase-item querying.
+- Add test coverage, privacy/consent, runtime monitoring and production security.
 
-## Fase 3 — API Backend-Aidan
-- [ ] Ler código e documentação do backend.
-- [ ] Fechar contrato OpenAPI/Swagger e modelo do banco.
-- [ ] Implementar auth, permissões, validação, rate limit e políticas de privacidade.
-- [ ] Criar endpoints de perfil, produtos, lista, pedidos, mercados, comunidade e localização.
-- [ ] Deploy, migrações, CI, logs, métricas e segurança.
+## Release flow
+- Work on `dev`; verify on Android devices; merge to `main` by PR.
+- Build a fresh EAS APK when native modules change.
